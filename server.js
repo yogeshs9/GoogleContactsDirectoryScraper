@@ -2,7 +2,7 @@ const puppeteer = require('puppeteer');
 const fs = require('fs')
 
 //CHANGE THIS ACCORDING TO YOUR REQUIREMENTS
-const time_between_scrolls_min_max = [500,1500] //Minimum and Maximum time between scrolls
+const time_between_scrolls_min_max = [800,1500] //Minimum and Maximum time between scrolls
 
 function getRndInteger(min, max) {
   return Math.floor(Math.random() * (max - min + 1) ) + min;
@@ -77,7 +77,7 @@ const getContacts = async () => {
   await page.goto('https://contacts.google.com/directory', { waitUntil: 'networkidle0' })
   console.log("Directory Page Loaded");
 
-  //google login code
+  //For Google Login
   /* page.evaluate((val)=>{
       document.getElementById("identifierId").value = val;
       document.getElementsByClassName("Vwe4Vb MbhUzd")[0].click() 
@@ -94,7 +94,7 @@ const getContacts = async () => {
   await page.waitForNavigation({ waitUntil: 'networkidle0' })
   console.log("passwordDone") */
 
-  /*
+  /* //Debugging
   for(contact of document.getElementsByClassName("zYQnTe")){
       let name = contact.getElementsByClassName("PDfZbf")[0].innerText
       let email = contact.getElementsByClassName("hUL4le")[0].innerText
@@ -111,7 +111,13 @@ const getContacts = async () => {
   //Get Total Number of contacts that is displayed at the top of the page
   var total_contacts_as_shown_on_google = await page.evaluate(() => {return parseInt(/\(([^)]+)\)/.exec(document.querySelector(".FX4Q3d").innerHTML)[1].replace(",",""))});
 
+  //Estimated Missed Value
   var missed_values = 0;
+
+  //Values Fetched in current scroll
+  var current_fetch = 0;
+
+  var infinite_loop_prevention_counter = 0;
 
   let contacts = await page.evaluate(() => {
     let contacts = [];
@@ -145,6 +151,7 @@ const getContacts = async () => {
 
     })
   
+    
 
     //delay after scroll for loading data
     var time_between_scrolls = getRndInteger(time_between_scrolls_min_max[0],time_between_scrolls_min_max[1])
@@ -185,19 +192,30 @@ const getContacts = async () => {
     console.log(arr);
 
     //Printing Current Fetch Number
-    console.log("Contacts Fetched in this scroll - ",contacts.length - currentContactsCount);
+    current_fetch = contacts.length - currentContactsCount;
+    console.log("Contacts Fetched in this scroll - ",current_fetch);
     console.log("Missed Contacts - ",missed_values);
+
+    if(current_fetch == 0){
+      infinite_loop_prevention_counter++;
+    }else{
+      infinite_loop_prevention_counter = 0;
+    }
 
     currentScroll = await page.evaluate(() => {
       return document.getElementsByClassName("zQTmif SSPGKf eejsDc")[0].scrollTop
     });
-    console.log("Scrolling (",currentScroll,")")
+    console.log("Scrolling Until ",currentScroll," != ",scrollMax," -- inf-",infinite_loop_prevention_counter)
 
     currentContactsCount =  contacts.length
-    console.log("Total Contacts Fetched till now - ",currentContactsCount)
+    console.log("Total Contacts Fetched till now - ",currentContactsCount,"(of ",total_contacts_as_shown_on_google," total)")
 
-  } while (currentScroll != scrollMax)
+  } while ((currentScroll != scrollMax) || (infinite_loop_prevention_counter > 150) )
+  //prevented infinite loop with counter
 
+  if(infinite_loop_prevention_counter > 15){
+    console.log("Infinite loop was detected and hence the loop was terminated. The results may not be complete. PLease Fix the problem and try again. Number of dry loops detected before termination - ",infinite_loop_prevention_counter);
+  }
 
 
   //Constructing output type 1
@@ -205,23 +223,9 @@ const getContacts = async () => {
     acc[curr.email] = curr.name;
     return acc;
   }, {})
-
-
-
-  /* const filteredOutput = contacts.filter(obj => ![].filter.call(obj.name.replace(/\s/g, ''), isFinite).length)
-  console.log("contacts: " + filteredOutput.length)
-  console.log("done filtering output") */
   
   //Constructing output type 2
   const contacts_name_email = contacts.map(x=>{return {"name": x.name, "email": x.email}})
-
-  /* try {
-    fs.writeFileSync('output.json', JSON.stringify(filteredOutput))
-  } catch (err) {
-    console.error(err)
-  } */
-
-
 
   //Saving Raw Output
   try {
@@ -246,14 +250,14 @@ const getContacts = async () => {
 
   //Saving Script Report
   var date_time = new Date();
-  var report = `\n
+  var report = `\n\n\n
 Report Generated on - ${date_time}
 Total Number of Contacts Fetched - ${contacts.length}
 Total Number Contacts as shown on Directory Page - ${total_contacts_as_shown_on_google}
-Estimated Number of contacts missed(Rough Calculation) - ${missed_values}
+Estimated Number of contacts missed(Rough Estimate - Unreliable) - ${missed_values}
 Real Number of contacts missed - ${total_contacts_as_shown_on_google - contacts.length}`;
   try {
-    fs.writeFile('reports.txt',report)
+    fs.appendFileSync('reports.txt',report)
   } catch (err) {
     console.error(err)
   }
@@ -262,5 +266,5 @@ Real Number of contacts missed - ${total_contacts_as_shown_on_google - contacts.
   console.log("Finished saving the outputs to File.\n Closing Script Now.")
 }
 
-
+//Starting the Script
 getContacts()
