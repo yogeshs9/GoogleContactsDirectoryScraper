@@ -1,0 +1,17 @@
+{
+  "name": "google_contacts_org_directory_scraper",
+  "version": "1.1.0",
+  "description": "This is a Puppeteer Node.js script that web-scrapes the directory page of google contacts (of G-Suite Accounts) for name and email of all the members in an organisation.",
+  "main": "server.js",
+  "dependencies": {
+    "puppeteer": "^5.2.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {},
+  "author": "Yogesh Choudhary",
+  "license": "ISC"
+}
