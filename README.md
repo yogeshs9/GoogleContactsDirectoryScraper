@@ -24,5 +24,4 @@ npm start
 ```
 This will start the execution of the script and generate the output results files once execution is completed.
 
-Author - Yogesh Choudhary
-Contact- choudharyyogsa17ite@student.mes.ac.in
+Author - Yogesh Choudhary - choudharyyogsa17ite@student.mes.ac.in
