@@ -205,12 +205,12 @@ const getContacts = async () => {
     currentScroll = await page.evaluate(() => {
       return document.getElementsByClassName("zQTmif SSPGKf eejsDc")[0].scrollTop
     });
-    console.log("Scrolling Until ",currentScroll," != ",scrollMax," -- inf-",infinite_loop_prevention_counter)
+    console.log("Scrolling Until ",currentScroll," == ",scrollMax,"--inf_counter-",infinite_loop_prevention_counter)
 
     currentContactsCount =  contacts.length
     console.log("Total Contacts Fetched till now - ",currentContactsCount,"(of ",total_contacts_as_shown_on_google," total)")
 
-  } while ((currentScroll != scrollMax) || (infinite_loop_prevention_counter > 150) )
+  } while ((currentScroll != scrollMax) && (infinite_loop_prevention_counter < 150) )
   //prevented infinite loop with counter
 
   if(infinite_loop_prevention_counter > 15){
