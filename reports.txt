@@ -1,0 +1,9 @@
+
+
+
+
+Report Generated on - Fri Jul 24 2020 16:26:11 GMT+0530 (India Standard Time)
+Total Number of Contacts Fetched - 49021
+Total Number Contacts as shown on Directory Page - 49033
+Estimated Number of contacts missed(Rough Estimate - Unreliable) - 3159
+Real Number of contacts missed - 12
